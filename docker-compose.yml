@@ -1,0 +1,27 @@
+version: '3.1'
+services:
+  redis:
+    container_name: redis
+    hostname: redis
+    image: redis:5.0
+    ports:
+      - ${REDIS_PORT:-6379}:6379
+    environment:
+      - 'REDIS_HOST_PASSWORD=${REDIS_HOST_PASSWORD:-redis}'
+    command: /bin/sh -c "redis-server --requirepass $$REDIS_HOST_PASSWORD"
+
+  redis-commander:
+    container_name: redis-commander
+    hostname: redis-commander
+    image: ghcr.io/joeferner/redis-commander:latest
+    depends_on:
+      - redis
+    restart:
+      unless-stopped
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PASSWORD=${REDIS_HOST_PASSWORD}
+      - HTTP_USER=${COMMANDER_HTTP_USER:-commander}
+      - HTTP_PASSWORD=${COMMANDER_HTTP_PASSWORD:-commander}
+    ports:
+      - "${COMMANDER_PORT:-8081}:8081"
